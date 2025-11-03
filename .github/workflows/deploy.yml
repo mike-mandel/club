@@ -1,0 +1,47 @@
+name: Deploy to Github Pages
+
+on: 
+  #Enables 'Run workflow' button on Actions page
+  workflow_dispatch:
+  #Only deploy on pushes to main branch
+  push:
+    branches: 
+      - main
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs: 
+  deploy:
+    runs-on: unbuntu-latest #Use unbuntu VM
+
+    steps: 
+      #Get a copy of the repositories code
+      name: Checkout Repository
+      uses: actions/checkout@v4
+
+      #Install node and npm
+      name: Setup Node.jobs
+      uses: actions/setup-node@v4
+      with: 
+        node-version: '24'
+      
+      #Clean Install
+      name: Install Dependencies
+      run: npm ci
+
+      #Build project into './dist' folder
+      name: Build Project
+      run: npm run build
+
+      #Package the built site so the deploy action can access and publish it to Github Pages
+      name: Upload site
+      uses: actions/upload-pages-artifact@v4
+      with:
+        path: ./dist
+
+      #Finally push built project to gh-pages branch
+      name: Deploy
+      id: deployment
+      uses: actions/deploy-pages@v4
